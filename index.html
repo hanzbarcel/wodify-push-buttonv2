@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Wodify TVs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+        <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Wodify Update</h1>
+        <p class="text-lg text-slate-600 mb-8">Click the button below to push today's workout to the TV displays.</p>
+
+        <button id="updateButton" class="w-full py-4 px-6 rounded-2xl bg-blue-600 text-white font-semibold text-xl shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
+            Push to TVs
+        </button>
+
+        <div id="statusMessage" class="mt-6 text-sm font-medium"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const updateButton = document.getElementById('updateButton');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // This is the URL from your n8n Webhook node.
+            const webhookURL = 'https://wilcraig.app.n8n.cloud/webhook/b9745401-58f0-4af3-bc51-4681b75ecb6e';
+
+            updateButton.addEventListener('click', async () => {
+                // Change button state to show loading
+                updateButton.disabled = true;
+                updateButton.textContent = 'Pushing...';
+                statusMessage.textContent = 'Processing request...';
+                statusMessage.className = 'mt-6 text-sm font-medium text-blue-600 animate-pulse';
+
+                try {
+                    const response = await fetch(webhookURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ trigger: 'push_workout' })
+                    });
+
+                    if (response.ok) {
+                        updateButton.textContent = 'Success!';
+                        statusMessage.textContent = 'Workout successfully pushed to TVs!';
+                        statusMessage.className = 'mt-6 text-sm font-medium text-green-600';
+                    } else {
+                        throw new Error('Server responded with an error.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    updateButton.textContent = 'Try Again';
+                    statusMessage.textContent = 'Failed to push workout. Please try again.';
+                    statusMessage.className = 'mt-6 text-sm font-medium text-red-600';
+                } finally {
+                    updateButton.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
